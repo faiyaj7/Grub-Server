@@ -1,0 +1,43 @@
+name: 🚀 Deploy Node.js Server on Push
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    name: 🎉 Deploy
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: 🚚 Get latest code
+      uses: actions/checkout@v2
+
+    - name: Use Node.js 18
+      uses: actions/setup-node@v2
+      with:
+        node-version: "18"
+
+    - name: 🔨 Install Dependencies
+      run: npm install
+
+    - name: Create .env file
+      run: |
+        echo "CLIENT_DOMAIN=${{ secrets.client_domain }}" >> .env
+        echo "PORT=${{ secrets.port }}" >> .env
+        echo "STRIPE_SECRET_KEY=${{ secrets.stripe_secret }}" >> .env
+
+    - name: 📂 Sync files
+      uses: SamKirkland/FTP-Deploy-Action@4.1.0
+      with:
+        server: ${{ secrets.ftp_server }}
+        username: ${{ secrets.ftp_name }}
+        password: ${{ secrets.ftp_password }}
+        local-dir: ./
+        dangerous-clean-slate: true
+    
+    - name: Restart Server (Optional)
+      run: |
+        # Add commands to restart your server if necessary
+        echo "Server restart command here"
